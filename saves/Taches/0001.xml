@@ -1,0 +1,10 @@
+<tache>
+	<id>0001</id>
+	<texte>Faire à manger</texte>
+	<priorite>Haute</priorite>
+	<etat>Non commencée</etat>
+	<createur>John Do</createur> <!-- ID DE L'UTILISATEUR CREATEUR DE LA TACHE-->
+	<realisateur>John Do</realisateur> <!-- ID DE L'UTILISATEUR QUI DOIT REALISER LA TACHE-->
+	<dateCreation>10/01/2017</dateCreation>
+	<dateFin>10/01/2017</dateFin>
+</tache>

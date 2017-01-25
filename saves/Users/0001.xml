@@ -1,0 +1,13 @@
+
+<user>
+	<id>0001</id> 
+	<nom>Do</nom>
+	<prenom>John</prenom>
+	<mail>johndo@hotmail.fr</mail>
+	<mdp>1234</mdp>
+	<lstTaches>
+		<tacheRea>0001</tacheRea> <!-- ID DE LA TACHE -->
+		<tacheRea>0002</tacheRea> <!-- ID DE LA TACHE -->
+		<tacheCrea>0001</tacheCrea> <!-- ID DE LA TACHE -->
+	</lstTaches>
+</user>
