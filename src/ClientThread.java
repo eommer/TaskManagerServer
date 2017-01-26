@@ -332,6 +332,7 @@ public class ClientThread extends Thread {
 				System.out.println("Prenom : " + user.prenom);
 				System.out.println("Email : " + user.mail);
 				System.out.println("Mdp : " + user.mdp);
+				
 				for (Tache t : user.lstTachesRea) {
 					System.out.println("Tache a réaliser : " + t);
 				}
@@ -340,7 +341,6 @@ public class ClientThread extends Thread {
 				}
 
 			} else {
-
 				System.out.println("USER NOT FOUND");
 
 				dout.writeBytes("NO USER\n");
