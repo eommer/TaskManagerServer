@@ -1,4 +1,6 @@
 import org.xml.sax.Attributes;
+import model.Tache;
+import model.User;
 
 import org.xml.sax.SAXException;
 

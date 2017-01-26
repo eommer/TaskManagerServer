@@ -1,3 +1,6 @@
+import java.io.File;
+import model.Tache;
+import model.User;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -11,6 +14,12 @@ public class TacheXMLWriter {
 	public XMLOutputFactory factory;
 	XMLStreamWriter writer;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	
+	public boolean tacheAlreadyExists(String id){
+		
+		return new File("Taches/"+id+".xml").exists();
+		
+	}
 	
 	public void writeTache(String id, Tache tache) throws XMLStreamException, IOException {
 		

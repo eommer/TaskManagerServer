@@ -1,4 +1,6 @@
 import java.io.File;
+import model.Tache;
+import model.User;
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;

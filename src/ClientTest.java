@@ -1,4 +1,6 @@
 import java.io.BufferedReader;
+import model.Tache;
+import model.User;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,30 +17,50 @@ import java.util.Date;
 import javafx.util.converter.LocalDateStringConverter;
 
 public class ClientTest {
+	
+		private  BufferedReader din;
+		private ObjectInputStream ois;
+		private DataOutputStream dout;
+		private ObjectOutputStream oos;
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-		/*User user;
-		user = testInscription();
-		testValidation(user);
-		testConnexion(user);*/
-		TestValidation();
+		
+		ClientTest client = new ClientTest();
+		User user;
+		//user = testInscription();
+		//testValidation(user);
+		client.testConnexion();
+		//TestValidation();
 	}
 	
-	public static void testConnexion(User user) throws UnknownHostException, IOException, ClassNotFoundException, InterruptedException{
-		
+	public void testConnexion() throws UnknownHostException, IOException, ClassNotFoundException, InterruptedException{
+		User user;
 		Socket socket = new Socket("localHost", 1500);
-		DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
-		outToServer.writeBytes("CONNEXION\n");
+	
+		//Entrée
+		InputStream is = socket.getInputStream();
+        din = new BufferedReader(new InputStreamReader(is));
+		System.out.println("OK");
+        ois = new ObjectInputStream(is);       
+        System.out.println("OK");
+        
+        //Sortie
+        OutputStream os = socket.getOutputStream();
+        dout = new DataOutputStream(os);
+        oos = new ObjectOutputStream(os);
+        
+        System.out.println("OK");
+               
+		dout.writeBytes("CONNEXION\n");
 		Thread.sleep(1);
-		outToServer.writeBytes("johndo@hotmail.fr\n");
+		dout.writeBytes("johndo@hotmail.fr\n");
 		Thread.sleep(1);
-		outToServer.writeBytes("123\n");
+		dout.writeBytes("123\n");
 		System.out.println("connexion effectuée");
-		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		String msg = in.readLine();
+		String msg = din.readLine();
 		if(msg.equals("OK")){
-			ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream());
-			user = (User) objectIn.readObject();
+			
+			user = (User) ois.readObject();
 			
 			System.out.println("ID : " + user.userID);
 			System.out.println("Nom : " + user.nom);
@@ -56,7 +78,7 @@ public class ClientTest {
 	}
 	
 	
-	public static User testInscription() throws UnknownHostException, IOException, ClassNotFoundException{
+	public User testInscription() throws UnknownHostException, IOException, ClassNotFoundException{
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		User user;
 		user = new User();
@@ -112,9 +134,9 @@ public class ClientTest {
 		return user;
 	}
 
-	public static void TestValidation() throws UnknownHostException, IOException, InterruptedException{
+	public void TestValidation() throws UnknownHostException, IOException, InterruptedException{
 		SaxParserTache saxParserTache = new SaxParserTache();
-		Tache task = saxParserTache.ParserTache("0001");
+		Tache task = saxParserTache.ParserTache("taskTest");
 		
 		Socket socket = new Socket("localHost", 1500);
 		DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());

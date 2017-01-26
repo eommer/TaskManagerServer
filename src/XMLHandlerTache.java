@@ -1,4 +1,6 @@
 import java.text.ParseException;
+import model.Tache;
+import model.User;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

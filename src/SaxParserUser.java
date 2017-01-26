@@ -1,6 +1,8 @@
 
 import java.io.File;
 import java.io.IOException;
+import model.Tache;
+import model.User;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;

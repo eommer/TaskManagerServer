@@ -1,5 +1,7 @@
 import java.io.FileOutputStream;
 import java.io.IOException;
+import model.Tache;
+import model.User;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
