@@ -10,14 +10,14 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import model.Tache;
-import model.User;
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.TransformerException;	
+import javax.xml.transform.TransformerException;
 
 import org.xml.sax.SAXException;
+
+import model.Tache;
+import model.User;
 
 public class ClientThread extends Thread {
 
@@ -37,74 +37,73 @@ public class ClientThread extends Thread {
 
 	public ClientThread(Socket socket) throws IOException {
 		socketClient = socket;
-		//Entrée
+
+		// Sortie
+		OutputStream os = socketClient.getOutputStream();
+		dout = new DataOutputStream(os);
+		oos = new ObjectOutputStream(os);
+
+		// Entrée
 		InputStream is = socketClient.getInputStream();
-        din = new BufferedReader(new InputStreamReader(is));
-        ois = new ObjectInputStream(is);
-        
-        System.out.println("OK");
-        
-        //Sortie
-        OutputStream os = socketClient.getOutputStream();
-        dout = new DataOutputStream(os);
-        oos = new ObjectOutputStream(os);
+		din = new BufferedReader(new InputStreamReader(is));
+		ois = new ObjectInputStream(is);
+
+		System.out.println("OK");
+
 	}
 
 	public void run() {
 		try {
-			
-
-
 			System.out.println("THREAD CLIENT STARTED");
+
+			while (!socketClient.isClosed()) {
+				Request clientRequest = Request.valueOf(din.readLine());
+
+				// Connection d'un utilisateur
+				switch (clientRequest) {
+				case CONNEXION:
+					Connexion();
+					break;
+
+				// inscription d'un utilisateur
+				case INSCRIPTION:
+					Inscription();
+					break;
+
+				// Mise à jour d'une tâche
+				case VALIDATION:
+					Validation();
+					break;
+
+				// Actualisation d'un utilisateur
+				case ACTUALISATION:
+					Actualisation();
+					break;
+
+				// Suppression d'une tache
+				case SUPPRESSION:
+					Suppression();
+					break;
+				}
+
 			
-			Request clientRequest = Request.valueOf(din.readLine());
-			
-			// Connection d'un utilisateur
-			switch (clientRequest) {
-			case CONNEXION:
-				Connexion();
-				break;
-
-			// inscription d'un utilisateur
-			case INSCRIPTION:
-				Inscription();
-				break;
-
-			// Mise à jour d'une tâche
-			case VALIDATION:
-				Validation();
-				break;
-
-			// Actualisation d'un utilisateur
-			case ACTUALISATION:
-				Actualisation();
-				break;
-
-			// Suppression d'une tache
-			case SUPPRESSION:
-				Suppression();
-				break;
-
 			}
-			
-			socketClient.close();
-			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("THREAD CLIENT CLOSED");
 		}
 	}
 
 	/**
-	 * Méthode permettant de mettre à jour/ajouter une tache. 
-	 * Reçoie l'objet tache et génere un ID si cette dernière n'en possède pas ou n'éxiste pas encore et renvoie "OK". 
-	 * Prévoir un timeOut coté client car le serveur ne répond rien en cas de problème rencontré.
+	 * Méthode permettant de mettre à jour/ajouter une tache. Reçoie l'objet
+	 * tache et génere un ID si cette dernière n'en possède pas ou n'éxiste pas
+	 * encore et renvoie "OK". Prévoir un timeOut coté client car le serveur ne
+	 * répond rien en cas de problème rencontré.
 	 */
 	private void Validation() {
-		
+
 		try {
 
-			
 			System.out.println("VALIDATION");
 			Thread.sleep(20);
 			task = (Tache) ois.readObject();
@@ -125,8 +124,7 @@ public class ClientThread extends Thread {
 
 			TacheXMLWriter tacheXmlWriter = new TacheXMLWriter();
 
-			if (task.tacheID == null || task.tacheID.equals("")
-					|| !tacheXmlWriter.tacheAlreadyExists(task.tacheID)) {
+			if (task.tacheID == null || task.tacheID.equals("") || !tacheXmlWriter.tacheAlreadyExists(task.tacheID)) {
 				System.out.println("nouvelle tache");
 				task.tacheID = UUID.randomUUID().toString();
 
@@ -193,8 +191,7 @@ public class ClientThread extends Thread {
 				System.out.println("Tache créée : " + t);
 			}
 
-			System.out
-					.println("*********************************************************************");
+			System.out.println("*********************************************************************");
 
 			user = userRea;
 
@@ -215,11 +212,8 @@ public class ClientThread extends Thread {
 			UserXMLWriter userXmlWriter = new UserXMLWriter();
 			userXmlWriter.writeUser(userCreat.userID, userCreat);
 			userXmlWriter.writeUser(userRea.userID, userRea);
-			
 
 			dout.writeBytes("OK\n");
-			
-			
 
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -237,12 +231,12 @@ public class ClientThread extends Thread {
 	}
 
 	/**
-	 * Méthode appellée lorsqu'un client souhaite inscrire un utilisateur. 
-	 * Reçoie l'objet utilisateur sans ID et renvoie "OK" suivi de l'objet utilisateur avec un ID ou "Problem parsing Users.xml" si problème de parsing 
-	 * ou "Email already use" si l'email n'est pas disponnible
+	 * Méthode appellée lorsqu'un client souhaite inscrire un utilisateur.
+	 * Reçoie l'objet utilisateur sans ID et renvoie "OK" suivi de l'objet
+	 * utilisateur avec un ID ou "Problem parsing Users.xml" si problème de
+	 * parsing ou "Email already use" si l'email n'est pas disponnible
 	 */
 	private void Inscription() {
-
 		String newId;
 		String returnMsg = "";
 
@@ -252,8 +246,7 @@ public class ClientThread extends Thread {
 
 			UserXMLWriter xmlWriter = new UserXMLWriter();
 
-			if (new SaxParserAllUsers().ParserUserId(user.mail).equals(
-					"User not found")) {
+			if (new SaxParserAllUsers().ParserUserId(user.mail).equals("User not found")) {
 
 				System.out.println("Email disponnible");
 				newId = UUID.randomUUID().toString();
@@ -266,10 +259,9 @@ public class ClientThread extends Thread {
 
 				System.out.println("OK");
 				dout.writeBytes("OK\n"); // msg de confirmation pr le
-												// client
+											// client
 
 				oos.writeObject(user);
-				dout.close();
 			} else if (new SaxParserAllUsers().ParserUserId(user.mail) == null) {
 				dout.writeBytes("Problem parsing Users.xml\n");
 			} else {
@@ -299,21 +291,22 @@ public class ClientThread extends Thread {
 	}
 
 	/**
-	 * Méthode appellée lorsqu'un client souhaite se connecter. 
-	 * Reçoie le mail puis le mdp et renvoie "OK" puis l'utilisateur ou "NO USER" si l'utilisateur n'éxiste pas
+	 * Méthode appellée lorsqu'un client souhaite se connecter. Reçoie le mail
+	 * puis le mdp et renvoie "OK" puis l'utilisateur ou "NO USER" si
+	 * l'utilisateur n'éxiste pas
 	 */
 	private void Connexion() {
 
 		SaxParserUser saxParserUser;
 		String mail = "";
 		String mdp = "";
-		String id ="";
+		String id = "";
 
 		try {
 			System.out.println("CONNEXION");
 
-			mail = din.readLine(); //récupération mail
-			mdp = din.readLine(); //récupération mdp
+			mail = din.readLine(); // récupération mail
+			mdp = din.readLine(); // récupération mdp
 
 			System.out.println(mail);
 			System.out.println(mdp);
@@ -331,7 +324,7 @@ public class ClientThread extends Thread {
 
 				dout.writeBytes("OK\n");
 				oos.writeObject(user);
-				
+
 				// AFFICHAGE USER RECUPERE
 
 				System.out.println("ID : " + user.userID);
@@ -353,7 +346,6 @@ public class ClientThread extends Thread {
 				dout.writeBytes("NO USER\n");
 			}
 
-
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -361,35 +353,36 @@ public class ClientThread extends Thread {
 	}
 
 	/**
-	 * Méthode appellée lorsqu'un client souhaite récuperé la dernière version de son utilisateur enregistrée sur le serveur. 
-	 * Reçoie l'id de l'utilisateur puis Renvoie "OK" suivi de l'utilisateur
+	 * Méthode appellée lorsqu'un client souhaite récuperé la dernière version
+	 * de son utilisateur enregistrée sur le serveur. Reçoie l'id de
+	 * l'utilisateur puis Renvoie "OK" suivi de l'utilisateur
 	 */
 	private void Actualisation() {
 		try {
-			
+
 			SaxParserUser saxParserUser = new SaxParserUser();
 			String id = "";
-			
+
 			System.out.println("ACTUALISATION");
-			
-			id = din.readLine(); //récupération id de l'utilisateur
-			user = saxParserUser.ParserUser(id); //Récupération de l'utilisateur enregistré sur le serveur
-			
-			
+
+			id = din.readLine(); // récupération id de l'utilisateur
+			user = saxParserUser.ParserUser(id); // Récupération de
+													// l'utilisateur enregistré
+													// sur le serveur
+
 			/* Si l'utilisateur éxiste sur le serveur */
-			if(user != null){
-				
+			if (user != null) {
+
 				System.out.println("USER FOUND");
 				dout.writeBytes("OK\n");
 				oos.writeObject(user);
-				oos.close();
 			}
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private void Suppression() {
