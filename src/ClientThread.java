@@ -32,7 +32,7 @@ public class ClientThread extends Thread {
 	private ObjectOutputStream oos;
 
 	private static enum Request {
-		CONNEXION, INSCRIPTION, VALIDATION, ACTUALISATION, SUPPRESSION;
+		INIT, CONNEXION, INSCRIPTION, VALIDATION, ACTUALISATION, SUPPRESSION;
 	}
 
 	public ClientThread(Socket socket) throws IOException {
@@ -61,6 +61,10 @@ public class ClientThread extends Thread {
 
 				// Connection d'un utilisateur
 				switch (clientRequest) {
+				case INIT:
+					dout.writeBytes("INIT OK\n");
+					break;
+					
 				case CONNEXION:
 					Connexion();
 					break;
