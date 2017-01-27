@@ -1,15 +1,11 @@
-import java.text.ParseException;
-import model.Tache;
-import model.User;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import org.xml.sax.Attributes;
-
 import org.xml.sax.SAXException;
-
 import org.xml.sax.helpers.DefaultHandler;
+
+import model.Tache;
 
 
 public class XMLHandlerTache extends DefaultHandler{
@@ -42,6 +38,9 @@ public class XMLHandlerTache extends DefaultHandler{
 		  else{
 			  if(this.nameBalise == "id"){
 				  tache.tacheID = str; 
+			  }
+			  else if(this.nameBalise == "titre"){
+				  tache.titre = str; 
 			  }
 			  else if(this.nameBalise == "texte"){
 				  tache.texte = str; 

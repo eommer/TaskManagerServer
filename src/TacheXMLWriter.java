@@ -1,6 +1,4 @@
 import java.io.File;
-import model.Tache;
-import model.User;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -8,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
+import model.Tache;
 
 public class TacheXMLWriter {
 	
@@ -30,6 +30,7 @@ public class TacheXMLWriter {
 	    writer.writeStartDocument();
 	    writer.writeStartElement("tache");
 	    writeElt("id", tache.tacheID);
+	    writeElt("titre", tache.titre);
 	    writeElt("texte", tache.texte);
 	    writeElt("priorite", tache.priorite);
 	    writeElt("etat", tache.etat);

@@ -11,7 +11,6 @@ public class Server{
 	public static void main(String[] args) throws InterruptedException {
 
 		try {
-			
 			socketServer = new ServerSocket(PORT);
 
 			while (true) {

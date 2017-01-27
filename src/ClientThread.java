@@ -217,9 +217,10 @@ public class ClientThread extends Thread {
 			UserXMLWriter userXmlWriter = new UserXMLWriter();
 			userXmlWriter.writeUser(userCreat.userID, userCreat);
 			userXmlWriter.writeUser(userRea.userID, userRea);
-
+			
+			/*
 			dout.writeBytes("OK\n");
-			dout.flush();
+			dout.flush();*/
 
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -251,7 +252,7 @@ public class ClientThread extends Thread {
 			UserXMLWriter xmlWriter = new UserXMLWriter();
 
 			if (new SaxParserAllUsers().ParserUserId(user.mail).equals("User not found")) {
-
+				
 				System.out.println("Email disponnible");
 				newId = UUID.randomUUID().toString();
 				user.userID = newId;
