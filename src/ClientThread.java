@@ -29,7 +29,7 @@ public class ClientThread extends Thread {
 	private BufferedReader din;
 	private ObjectInputStream ois;
 	private DataOutputStream dout;
-	private ObjectOutputStream oos;
+	private ObjectOutputStream oos; //Souvenir d'une époque avec des bugs
 
 	private static enum Request {
 		INIT, CONNEXION, INSCRIPTION, VALIDATION, ACTUALISATION, SUPPRESSION;
@@ -58,11 +58,11 @@ public class ClientThread extends Thread {
 
 			while (!socketClient.isClosed()) {
 				Request clientRequest = Request.valueOf(din.readLine());
-
 				// Connection d'un utilisateur
 				switch (clientRequest) {
 				case INIT:
 					dout.writeBytes("INIT OK\n");
+					dout.flush();
 					break;
 					
 				case CONNEXION:
@@ -133,6 +133,7 @@ public class ClientThread extends Thread {
 				task.tacheID = UUID.randomUUID().toString();
 
 			}
+			
 			System.out.println(task.tacheID);
 			tacheXmlWriter.writeTache(task.tacheID, task);
 
@@ -218,6 +219,7 @@ public class ClientThread extends Thread {
 			userXmlWriter.writeUser(userRea.userID, userRea);
 
 			dout.writeBytes("OK\n");
+			dout.flush();
 
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -242,8 +244,6 @@ public class ClientThread extends Thread {
 	 */
 	private void Inscription() {
 		String newId;
-		String returnMsg = "";
-
 		try {
 
 			user = (User) ois.readObject();
@@ -262,15 +262,17 @@ public class ClientThread extends Thread {
 				allUsersXMLWriter.writeUser(user);
 
 				System.out.println("OK");
-				dout.writeBytes("OK\n"); // msg de confirmation pr le
-											// client
-
+				
+				ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
 				oos.writeObject(user);
+				oos.flush();
 			} else if (new SaxParserAllUsers().ParserUserId(user.mail) == null) {
 				dout.writeBytes("Problem parsing Users.xml\n");
+				dout.flush();
 			} else {
 				System.out.println("Email déjà utilisée");
 				dout.writeBytes("Email already use\n");
+				dout.flush();
 			}
 
 		} catch (IOException e1) {
@@ -304,8 +306,6 @@ public class ClientThread extends Thread {
 		SaxParserUser saxParserUser;
 		String mail = "";
 		String mdp = "";
-		String id = "";
-
 		try {
 			System.out.println("CONNEXION");
 
@@ -326,8 +326,12 @@ public class ClientThread extends Thread {
 
 				System.out.println("USER FOUND");
 
-				dout.writeBytes("OK\n");
+				//dout.writeBytes("OK\n");
+				//dout.flush();
+				
+				ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
 				oos.writeObject(user);
+				oos.flush();
 
 				// AFFICHAGE USER RECUPERE
 
@@ -347,7 +351,11 @@ public class ClientThread extends Thread {
 			} else {
 				System.out.println("USER NOT FOUND");
 
-				dout.writeBytes("NO USER\n");
+				//dout.writeBytes("NO USER\n");
+				//dout.flush();
+				ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
+				oos.writeObject(null);
+				oos.flush();
 			}
 
 		} catch (IOException e) {
@@ -378,8 +386,9 @@ public class ClientThread extends Thread {
 			if (user != null) {
 
 				System.out.println("USER FOUND");
-				dout.writeBytes("OK\n");
+				ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
 				oos.writeObject(user);
+				oos.flush();
 			}
 
 		} catch (IOException e) {
