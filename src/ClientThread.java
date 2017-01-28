@@ -11,6 +11,11 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,7 +40,7 @@ public class ClientThread extends Thread {
 	private ObjectOutputStream oos; //Souvenir d'une époque avec des bugs
 
 	private static enum Request {
-		INIT, CONNEXION, INSCRIPTION, VALIDATION, ACTUALISATION, SUPPRESSION;
+		INIT, CONNEXION, INSCRIPTION, VALIDATION, ACTUALISATION, SUPPRESSION, LISTEUSERS;
 	}
 
 	public ClientThread(Socket socket) throws IOException {
@@ -91,8 +96,12 @@ public class ClientThread extends Thread {
 				case SUPPRESSION:
 					Suppression();
 					break;
+				
+				//Envoie de la liste des tous les utilisateur <id, mail>
+				case LISTEUSERS :
+					sendListUser();
+					break;
 				}
-
 			
 			}
 		} catch (IOException e) {
@@ -105,6 +114,12 @@ public class ClientThread extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -512,7 +527,6 @@ public class ClientThread extends Thread {
 
 		userRea.lstTachesRea.clear();
 		userRea.lstTachesRea = temporaryCreaLst;
-
 		
 		/* Affichage */
 		User user = userCreat;
@@ -565,7 +579,33 @@ public class ClientThread extends Thread {
 		dout.writeBytes("OK\n");
 		dout.flush();*/
 
+	}
+	
+	/**
+	 * Méthode envoyant la liste de tous les utilisateur sous forme de hashMap(id, mail)
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws ParserConfigurationException
+	 */
+	public void sendListUser() throws SAXException, IOException, ParserConfigurationException{
+		
+		SaxParserAllUsers saxParserAllUsers = new SaxParserAllUsers();
+		Map<String, String> listUsers = saxParserAllUsers.updateListUsers(); //récupère la liste de tous les utilisateurs <id, mail>
+		
+		Set<Entry<String, String>> setHm = listUsers.entrySet();
+	    Iterator<Entry<String, String>> iterator = setHm.iterator();
+		while(iterator.hasNext()){
 
+	         Entry<String, String> e = iterator.next();
+	         System.out.println(e.getKey() + " : " + e.getValue());
+
+	      }
+		
+		System.out.println("SEND LIST");
+		ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
+		oos.writeObject(listUsers);
+		oos.flush();
+		
 	}
 
 }

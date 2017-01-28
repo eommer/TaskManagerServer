@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+
 import model.Tache;
 import model.User;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +15,8 @@ import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javafx.util.converter.LocalDateStringConverter;
 
@@ -29,7 +33,8 @@ public class ClientTest {
 		User user;
 		//user = testInscription();
 		//client.testConnexion();
-		client.TestValidation();
+		//client.TestValidation();
+		client.TestUpdateListUsers();
 	}
 	
 	public void testConnexion() throws UnknownHostException, IOException, ClassNotFoundException, InterruptedException{
@@ -147,6 +152,19 @@ public class ClientTest {
 		
 		Thread.sleep(50);
 		socket.close();
+		
+	}
+	
+	public void TestUpdateListUsers() throws UnknownHostException, IOException, ClassNotFoundException{
+		
+		Map<String, String> listUsers = new HashMap<>();
+		Socket socket = new Socket("localHost", 1500);
+		DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
+		outToServer.writeBytes("LISTEUSERS\n");
+		
+		
+		ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream());
+		listUsers = (Map<String, String>) objectIn.readObject();
 		
 	}
 
