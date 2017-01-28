@@ -457,7 +457,7 @@ public class ClientThread extends Thread {
 			userCreat = saxParserUser.ParserUser(task.idCreateur);
 			userRea = saxParserUser.ParserUser(task.idCreateur);
 		}
-
+		
 		TacheXMLWriter tacheXmlWriter = new TacheXMLWriter();
 	
 		System.out.println(task.tacheID);
