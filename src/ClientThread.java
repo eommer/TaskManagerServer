@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -7,6 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -95,6 +98,15 @@ public class ClientThread extends Thread {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println("THREAD CLIENT CLOSED");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (XMLStreamException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -113,6 +125,8 @@ public class ClientThread extends Thread {
 			task = (Tache) ois.readObject();
 
 			SaxParserUser saxParserUser = new SaxParserUser();
+			ArrayList<Tache> temporaryCreaLst = new ArrayList<Tache>();
+			UserXMLWriter userXmlWriter = new UserXMLWriter();
 
 			/*
 			 * Récupère l'utilisateur qui a créé la tache et celui qui doit la
@@ -128,10 +142,44 @@ public class ClientThread extends Thread {
 
 			TacheXMLWriter tacheXmlWriter = new TacheXMLWriter();
 
+			// Si la tache n'éxiste pas déja
 			if (task.tacheID == null || task.tacheID.equals("") || !tacheXmlWriter.tacheAlreadyExists(task.tacheID)) {
 				System.out.println("nouvelle tache");
 				task.tacheID = UUID.randomUUID().toString();
 
+			}
+			//Si la tache éxiste déja alors on supprime la tache des anciens utilisateurs
+			else{
+				Tache oldTask = new SaxParserTache().ParserTache(task.tacheID);
+				User oldCreateur = saxParserUser.ParserUser(oldTask.idCreateur);
+				User oldRealisateur = saxParserUser.ParserUser(oldTask.idRealisateur);
+				
+				for (Tache t : oldCreateur.lstTachesCrea) {
+					System.out.println("check task");
+					if (!t.tacheID.equals(task.tacheID)) {
+						temporaryCreaLst.add(t);
+					}
+				}
+				oldCreateur.lstTachesCrea.clear();
+				oldCreateur.lstTachesCrea = temporaryCreaLst;
+				
+				temporaryCreaLst.clear();
+
+				for (Tache t : oldRealisateur.lstTachesRea) {
+					System.out.println("check task");
+					if (!t.tacheID.equals(task.tacheID)) {
+						temporaryCreaLst.add(t);
+					}
+				}
+				oldRealisateur.lstTachesRea.clear();
+				oldRealisateur.lstTachesRea = temporaryCreaLst;
+				
+				temporaryCreaLst.clear();
+				
+				userXmlWriter.writeUser(oldCreateur.userID, oldCreateur);
+				userXmlWriter.writeUser(oldRealisateur.userID, oldRealisateur);
+				
+				System.out.println("MISE A JOUR DES ANCIENS UTILISATEURS DE LA TACHE");
 			}
 			
 			System.out.println(task.tacheID);
@@ -143,7 +191,7 @@ public class ClientThread extends Thread {
 
 			// Supprime la tache si elle éxiste déja chez l'utilisateur pour y
 			// mettre la version à jour
-			ArrayList<Tache> temporaryCreaLst = new ArrayList<Tache>();
+			
 
 			for (Tache t : userCreat.lstTachesCrea) {
 				System.out.println("check task");
@@ -180,6 +228,8 @@ public class ClientThread extends Thread {
 			userRea.lstTachesRea.clear();
 			userRea.lstTachesRea = temporaryCreaLst;
 
+			/* Affichage */
+			
 			User user = userCreat;
 
 			System.out.println("ID : " + user.userID);
@@ -214,7 +264,8 @@ public class ClientThread extends Thread {
 				System.out.println("Tache créée : " + t);
 			}
 
-			UserXMLWriter userXmlWriter = new UserXMLWriter();
+			/* Ecriture des nouveaux utilisateur en xml */
+			
 			userXmlWriter.writeUser(userCreat.userID, userCreat);
 			userXmlWriter.writeUser(userRea.userID, userRea);
 			
@@ -399,7 +450,119 @@ public class ClientThread extends Thread {
 
 	}
 
-	private void Suppression() {
+	private void Suppression() throws XMLStreamException, IOException, InterruptedException, ClassNotFoundException {
+		System.out.println("VALIDATION");
+		Thread.sleep(20);
+		task = (Tache) ois.readObject();
+
+		SaxParserUser saxParserUser = new SaxParserUser();
+
+		/*
+		 * Récupère l'utilisateur qui a créé la tache et celui qui doit la
+		 * réaliser
+		 */
+		if (!task.idCreateur.equals(task.idRealisateur)) {
+			userCreat = saxParserUser.ParserUser(task.idCreateur);
+			userRea = saxParserUser.ParserUser(task.idRealisateur);
+		} else {
+			userCreat = saxParserUser.ParserUser(task.idCreateur);
+			userRea = userCreat;
+		}
+
+		TacheXMLWriter tacheXmlWriter = new TacheXMLWriter();
+	
+		System.out.println(task.tacheID);
+		tacheXmlWriter.writeTache(task.tacheID, task);
+
+		/* Ajoute la tache aux deux utilisateurs */
+
+		System.out.println("ID DE LA TACHE : " + task.tacheID);
+
+		// Supprime la tache si elle éxiste déja chez l'utilisateur pour y
+		// mettre la version à jour
+		
+		/* Taches création */
+		ArrayList<Tache> temporaryCreaLst = new ArrayList<Tache>();
+
+		for (Tache t : userCreat.lstTachesCrea) {
+			System.out.println("check task");
+			if (t.tacheID.equals(task.tacheID)) {
+				System.out.println("tache deja présente ds Créa");
+			} else {
+				temporaryCreaLst.add(t);
+			}
+		}
+
+		userCreat.lstTachesCrea.clear();
+		userCreat.lstTachesCrea = temporaryCreaLst;
+
+		temporaryCreaLst.clear();
+
+		/* Taches réalisation */
+		for (Tache t : userRea.lstTachesRea) {
+			System.out.println("check task");
+			if (t.tacheID.equals(task.tacheID)) {
+				System.out.println("tache deja présente ds Réa");
+			} else {
+				temporaryCreaLst.add(t);
+			}
+		}
+
+		userRea.lstTachesRea.clear();
+		userRea.lstTachesRea = temporaryCreaLst;
+
+		
+		/* Affichage */
+		User user = userCreat;
+
+		System.out.println("ID : " + user.userID);
+		System.out.println("Nom : " + user.nom);
+		System.out.println("Prenom : " + user.prenom);
+		System.out.println("Email : " + user.mail);
+		System.out.println("Mdp : " + user.mdp);
+		for (Tache t : user.lstTachesRea) {
+			System.out.println("//////////////////////////");
+			System.out.println("Tache a réaliser : " + t);
+		}
+		for (Tache t : user.lstTachesCrea) {
+			System.out.println("//////////////////////////");
+			System.out.println("Tache créée : " + t);
+		}
+
+		System.out.println("*********************************************************************");
+
+		user = userRea;
+
+		System.out.println("ID : " + user.userID);
+		System.out.println("Nom : " + user.nom);
+		System.out.println("Prenom : " + user.prenom);
+		System.out.println("Email : " + user.mail);
+		System.out.println("Mdp : " + user.mdp);
+		for (Tache t : user.lstTachesRea) {
+			System.out.println("//////////////////////////");
+			System.out.println("Tache a réaliser : " + t);
+		}
+		for (Tache t : user.lstTachesCrea) {
+			System.out.println("//////////////////////////");
+			System.out.println("Tache créée : " + t);
+		}
+
+		/* Ecriture des nouveaux utilisateur en xml */
+		
+		UserXMLWriter userXmlWriter = new UserXMLWriter();
+		userXmlWriter.writeUser(userCreat.userID, userCreat);
+		userXmlWriter.writeUser(userRea.userID, userRea);
+		
+		/* Suppression du fichier de la tache sur le serveur */
+		if (tacheXmlWriter.tacheAlreadyExists(task.tacheID)) {
+			File taskXml = new File("Taches/" + task.tacheID +".xml");
+			taskXml.delete();		
+		}
+		
+		/*
+		dout.writeBytes("OK\n");
+		dout.flush();*/
+
 
 	}
 
