@@ -150,13 +150,15 @@ public class ClientThread extends Thread {
 			}
 			//Si la tache éxiste déja alors on supprime la tache des anciens utilisateurs
 			else{
+				
+				System.out.println("tache déja éxistante");
 				Tache oldTask = new SaxParserTache().ParserTache(task.tacheID);
 				User oldCreateur = saxParserUser.ParserUser(oldTask.idCreateur);
 				User oldRealisateur = saxParserUser.ParserUser(oldTask.idRealisateur);
 				
 				for (Tache t : oldCreateur.lstTachesCrea) {
 					System.out.println("check task");
-					if (!t.tacheID.equals(task.tacheID)) {
+					if (!t.tacheID.equals(oldTask.tacheID)) {
 						temporaryCreaLst.add(t);
 					}
 				}
@@ -167,7 +169,7 @@ public class ClientThread extends Thread {
 
 				for (Tache t : oldRealisateur.lstTachesRea) {
 					System.out.println("check task");
-					if (!t.tacheID.equals(task.tacheID)) {
+					if (!t.tacheID.equals(oldTask.tacheID)) {
 						temporaryCreaLst.add(t);
 					}
 				}

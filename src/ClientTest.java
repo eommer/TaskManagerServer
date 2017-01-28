@@ -28,9 +28,8 @@ public class ClientTest {
 		ClientTest client = new ClientTest();
 		User user;
 		//user = testInscription();
-		//testValidation(user);
-		client.testConnexion();
-		//TestValidation();
+		//client.testConnexion();
+		client.TestValidation();
 	}
 	
 	public void testConnexion() throws UnknownHostException, IOException, ClassNotFoundException, InterruptedException{
