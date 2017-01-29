@@ -1,10 +1,9 @@
+import java.util.HashMap;
+import java.util.Map;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.HashMap;
 
 
 public class XMLHandlerAllUsersList extends DefaultHandler{
@@ -13,7 +12,6 @@ public class XMLHandlerAllUsersList extends DefaultHandler{
    private String nameBalise;
    public String id;
    private String mail;
-   private int indexUser = 0;
    public Map<String, String> listUsers = new HashMap<>();
    
    public void startDocument() throws SAXException {
