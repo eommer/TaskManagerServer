@@ -458,6 +458,7 @@ public class ClientThread extends Thread {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void Suppression() throws XMLStreamException, IOException, InterruptedException, ClassNotFoundException {
 		System.out.println("Suppression");
 		Thread.sleep(20);
@@ -503,7 +504,7 @@ public class ClientThread extends Thread {
 		}
 
 		userCreat.lstTachesCrea.clear();
-		userCreat.lstTachesCrea = temporaryCreaLst;
+		userCreat.lstTachesCrea = (ArrayList<Tache>) temporaryCreaLst.clone();
 
 		temporaryCreaLst.clear();
 
@@ -518,7 +519,7 @@ public class ClientThread extends Thread {
 		}
 
 		userRea.lstTachesRea.clear();
-		userRea.lstTachesRea = temporaryCreaLst;
+		userRea.lstTachesRea = (ArrayList<Tache>) temporaryCreaLst.clone();
 
 		/* Affichage */
 		User user = userCreat;
