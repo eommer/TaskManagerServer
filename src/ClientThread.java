@@ -122,6 +122,7 @@ public class ClientThread extends Thread {
 	 * encore et renvoie "OK". Prévoir un timeOut coté client car le serveur ne
 	 * répond rien en cas de problème rencontré.
 	 */
+	@SuppressWarnings("unchecked")
 	private void Validation() {
 
 		try {
@@ -145,24 +146,7 @@ public class ClientThread extends Thread {
 					userRea = saxParserUser.ParserUser(task.idRealisateur);
 				} else {
 					userCreat = saxParserUser.ParserUser(task.idCreateur);
-					userRea = saxParserUser.ParserUser(task.idCreateur); // THEO,
-																			// QUAND
-																			// TU
-																			// FAIT
-																			// userRea=userCreat
-																			// ben
-																			// tu
-																			// DUPLIQUE
-																			// PAS.
-																			// DU
-																			// COUP
-																			// CA
-																			// MARCHAIT
-																			// MAIS
-																			// PAS
-																			// ENFAIT.
-																			// GENRE.
-																			// SISI.
+					userRea = saxParserUser.ParserUser(task.idCreateur);
 				}
 
 				TacheXMLWriter tacheXmlWriter = new TacheXMLWriter();
@@ -179,6 +163,7 @@ public class ClientThread extends Thread {
 
 					System.out.println("tache déja éxistante");
 					Tache oldTask = new SaxParserTache().ParserTache(task.tacheID);
+					
 					User oldCreateur = saxParserUser.ParserUser(oldTask.idCreateur);
 					User oldRealisateur = saxParserUser.ParserUser(oldTask.idRealisateur);
 
@@ -189,7 +174,8 @@ public class ClientThread extends Thread {
 						}
 					}
 					oldCreateur.lstTachesCrea.clear();
-					oldCreateur.lstTachesCrea = temporaryCreaLst;
+					oldCreateur.lstTachesCrea = (ArrayList<Tache>) temporaryCreaLst.clone();
+				
 
 					temporaryCreaLst.clear();
 
@@ -200,7 +186,7 @@ public class ClientThread extends Thread {
 						}
 					}
 					oldRealisateur.lstTachesRea.clear();
-					oldRealisateur.lstTachesRea = temporaryCreaLst;
+					oldRealisateur.lstTachesRea = (ArrayList<Tache>) temporaryCreaLst.clone();
 
 					temporaryCreaLst.clear();
 
@@ -239,7 +225,7 @@ public class ClientThread extends Thread {
 				System.out.println("/////////////////**************");
 
 				userCreat.lstTachesCrea.clear();
-				userCreat.lstTachesCrea = temporaryCreaLst;
+				userCreat.lstTachesCrea = (ArrayList<Tache>) temporaryCreaLst.clone();
 
 				temporaryCreaLst.clear();
 
@@ -254,7 +240,7 @@ public class ClientThread extends Thread {
 
 				temporaryCreaLst.add(task);
 				userRea.lstTachesRea.clear();
-				userRea.lstTachesRea = temporaryCreaLst;
+				userRea.lstTachesRea = (ArrayList<Tache>) temporaryCreaLst.clone();
 
 				/* Affichage */
 
