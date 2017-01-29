@@ -9,6 +9,10 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,7 +35,7 @@ public class ClientThread extends Thread {
 	private DataOutputStream dout;
 
 	private static enum Request {
-		INIT, CONNEXION, INSCRIPTION, VALIDATION, ACTUALISATION, SUPPRESSION;
+		INIT, CONNEXION, INSCRIPTION, VALIDATION, ACTUALISATION, SUPPRESSION, SENDLISTUSER;
 	}
 
 	public ClientThread(Socket socket) throws IOException {
@@ -45,7 +49,6 @@ public class ClientThread extends Thread {
 		InputStream is = socketClient.getInputStream();
 		din = new BufferedReader(new InputStreamReader(is));
 
-
 		System.out.println("OK");
 	}
 
@@ -54,7 +57,9 @@ public class ClientThread extends Thread {
 			System.out.println("THREAD CLIENT STARTED");
 
 			while (!socketClient.isClosed()) {
+				System.out.println("Attente...");
 				Request clientRequest = Request.valueOf(din.readLine());
+				System.out.println("Requete: " + clientRequest);
 				// Connection d'un utilisateur
 				switch (clientRequest) {
 				case INIT:
@@ -80,12 +85,16 @@ public class ClientThread extends Thread {
 				case ACTUALISATION:
 					Actualisation();
 					break;
-
 				// Suppression d'une tache
 				case SUPPRESSION:
 					Suppression();
 					break;
+					
+				case SENDLISTUSER:
+					sendListUser();
+					break;
 				}
+
 			}
 		} catch (IOException e) {
 			System.out.println("THREAD CLIENT CLOSED");
@@ -96,6 +105,12 @@ public class ClientThread extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -122,32 +137,51 @@ public class ClientThread extends Thread {
 				UserXMLWriter userXmlWriter = new UserXMLWriter();
 
 				/*
-				 * Récupère l'utilisateur qui a créé la tache et celui qui doit la
-				 * réaliser
+				 * Récupère l'utilisateur qui a créé la tache et celui qui doit
+				 * la réaliser
 				 */
 				if (!task.idCreateur.equals(task.idRealisateur)) {
 					userCreat = saxParserUser.ParserUser(task.idCreateur);
 					userRea = saxParserUser.ParserUser(task.idRealisateur);
 				} else {
 					userCreat = saxParserUser.ParserUser(task.idCreateur);
-					userRea = saxParserUser.ParserUser(task.idCreateur); //THEO, QUAND TU FAIT userRea=userCreat ben tu DUPLIQUE PAS. DU COUP CA MARCHAIT MAIS PAS ENFAIT. GENRE. SISI. 
+					userRea = saxParserUser.ParserUser(task.idCreateur); // THEO,
+																			// QUAND
+																			// TU
+																			// FAIT
+																			// userRea=userCreat
+																			// ben
+																			// tu
+																			// DUPLIQUE
+																			// PAS.
+																			// DU
+																			// COUP
+																			// CA
+																			// MARCHAIT
+																			// MAIS
+																			// PAS
+																			// ENFAIT.
+																			// GENRE.
+																			// SISI.
 				}
 
 				TacheXMLWriter tacheXmlWriter = new TacheXMLWriter();
 
 				// Si la tache n'éxiste pas déja
-				if (task.tacheID == null || task.tacheID.equals("") || !tacheXmlWriter.tacheAlreadyExists(task.tacheID)) {
+				if (task.tacheID == null || task.tacheID.equals("")
+						|| !tacheXmlWriter.tacheAlreadyExists(task.tacheID)) {
 					System.out.println("nouvelle tache");
 					task.tacheID = UUID.randomUUID().toString();
 				}
-				//Si la tache éxiste déja alors on supprime la tache des anciens utilisateurs
-				else{
-					
+				// Si la tache éxiste déja alors on supprime la tache des
+				// anciens utilisateurs
+				else {
+
 					System.out.println("tache déja éxistante");
 					Tache oldTask = new SaxParserTache().ParserTache(task.tacheID);
 					User oldCreateur = saxParserUser.ParserUser(oldTask.idCreateur);
 					User oldRealisateur = saxParserUser.ParserUser(oldTask.idRealisateur);
-					
+
 					for (Tache t : oldCreateur.lstTachesCrea) {
 						System.out.println("check task");
 						if (!t.tacheID.equals(oldTask.tacheID)) {
@@ -156,7 +190,7 @@ public class ClientThread extends Thread {
 					}
 					oldCreateur.lstTachesCrea.clear();
 					oldCreateur.lstTachesCrea = temporaryCreaLst;
-					
+
 					temporaryCreaLst.clear();
 
 					for (Tache t : oldRealisateur.lstTachesRea) {
@@ -167,15 +201,15 @@ public class ClientThread extends Thread {
 					}
 					oldRealisateur.lstTachesRea.clear();
 					oldRealisateur.lstTachesRea = temporaryCreaLst;
-					
+
 					temporaryCreaLst.clear();
-					
+
 					userXmlWriter.writeUser(oldCreateur.userID, oldCreateur);
 					userXmlWriter.writeUser(oldRealisateur.userID, oldRealisateur);
-					
+
 					System.out.println("MISE A JOUR DES ANCIENS UTILISATEURS DE LA TACHE");
 				}
-				
+
 				System.out.println(task.tacheID);
 				tacheXmlWriter.writeTache(task.tacheID, task);
 
@@ -183,9 +217,9 @@ public class ClientThread extends Thread {
 
 				System.out.println("ID DE LA TACHE : " + task.tacheID);
 
-				// Supprime la tache si elle éxiste déja chez l'utilisateur pour y
+				// Supprime la tache si elle éxiste déja chez l'utilisateur pour
+				// y
 				// mettre la version à jour
-				
 
 				for (Tache t : userCreat.lstTachesCrea) {
 					System.out.println("check task");
@@ -223,7 +257,7 @@ public class ClientThread extends Thread {
 				userRea.lstTachesRea = temporaryCreaLst;
 
 				/* Affichage */
-				
+
 				User user = userCreat;
 
 				System.out.println("ID : " + user.userID);
@@ -259,7 +293,7 @@ public class ClientThread extends Thread {
 				}
 
 				/* Ecriture des nouveaux utilisateur en xml */
-				
+
 				userXmlWriter.writeUser(userCreat.userID, userCreat);
 				userXmlWriter.writeUser(userRea.userID, userRea);
 			}
@@ -284,7 +318,7 @@ public class ClientThread extends Thread {
 	private void Inscription() {
 		String newId;
 		try {
-			
+
 			ObjectInputStream ois = new ObjectInputStream(socketClient.getInputStream());
 			user = (User) ois.readObject();
 
@@ -457,9 +491,9 @@ public class ClientThread extends Thread {
 			userCreat = saxParserUser.ParserUser(task.idCreateur);
 			userRea = saxParserUser.ParserUser(task.idCreateur);
 		}
-		
+
 		TacheXMLWriter tacheXmlWriter = new TacheXMLWriter();
-	
+
 		System.out.println(task.tacheID);
 		tacheXmlWriter.writeTache(task.tacheID, task);
 
@@ -469,7 +503,7 @@ public class ClientThread extends Thread {
 
 		// Supprime la tache si elle éxiste déja chez l'utilisateur pour y
 		// mettre la version à jour
-		
+
 		/* Taches création */
 		ArrayList<Tache> temporaryCreaLst = new ArrayList<Tache>();
 
@@ -500,7 +534,6 @@ public class ClientThread extends Thread {
 		userRea.lstTachesRea.clear();
 		userRea.lstTachesRea = temporaryCreaLst;
 
-		
 		/* Affichage */
 		User user = userCreat;
 
@@ -537,15 +570,43 @@ public class ClientThread extends Thread {
 		}
 
 		/* Ecriture des nouveaux utilisateur en xml */
-		
+
 		UserXMLWriter userXmlWriter = new UserXMLWriter();
 		userXmlWriter.writeUser(userCreat.userID, userCreat);
 		userXmlWriter.writeUser(userRea.userID, userRea);
-		
+
 		/* Suppression du fichier de la tache sur le serveur */
 		if (tacheXmlWriter.tacheAlreadyExists(task.tacheID)) {
-			File taskXml = new File("Taches/" + task.tacheID +".xml");
-			taskXml.delete();		
+			File taskXml = new File("Taches/" + task.tacheID + ".xml");
+			taskXml.delete();
 		}
 	}
+
+	/**
+	 * Méthode envoyant la liste de tous les utilisateur sous forme de
+	 * hashMap(id, mail)
+	 * 
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws ParserConfigurationException
+	 */
+	public void sendListUser() throws SAXException, IOException, ParserConfigurationException {
+		System.out.println("START LIST PARSING");
+		SaxParserAllUsers saxParserAllUsers = new SaxParserAllUsers();
+		Map<String, String> listUsers = saxParserAllUsers.updateListUsers(); 
+
+		Set<Entry<String, String>> setHm = listUsers.entrySet();
+		Iterator<Entry<String, String>> iterator = setHm.iterator();
+
+		while (iterator.hasNext()) {
+			Entry<String, String> e = iterator.next();
+			System.out.println(e.getKey() + " : " + e.getValue());
+		}
+
+		System.out.println("SEND LIST");
+		ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
+		oos.writeObject(listUsers);
+		oos.flush();
+	}
+
 }

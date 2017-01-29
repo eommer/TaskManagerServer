@@ -1,12 +1,9 @@
 import java.io.IOException;
-
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-
-import org.w3c.dom.DOMException;
 
 import org.xml.sax.SAXException;
 
@@ -14,6 +11,8 @@ public class SaxParserAllUsers {
 	
 	private String nameXMLFile ="Users.xml";
 	private XMLHandlerAllUsers xmlHandlerAllUsers;
+	private XMLHandlerAllUsersList xmlHandlerAllUsersList;
+	
 	
 	public String ParserUserId(String email){
 		try {
@@ -21,9 +20,7 @@ public class SaxParserAllUsers {
 	        SAXParserFactory factory = SAXParserFactory.newInstance();
 	
 	        SAXParser parser = factory.newSAXParser();
-	        
-	        
-	
+	       
 	        parser.parse(nameXMLFile, xmlHandlerAllUsers = new XMLHandlerAllUsers(email));
 	        
 	        if(xmlHandlerAllUsers.userIsFind)
@@ -39,5 +36,17 @@ public class SaxParserAllUsers {
 	        e.printStackTrace();
 	        return null;
 	     }
+	}
+	
+	public Map<String, String> updateListUsers() throws SAXException, IOException, ParserConfigurationException{
+		
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		
+        SAXParser parser = factory.newSAXParser();
+        
+        parser.parse(nameXMLFile, xmlHandlerAllUsersList = new XMLHandlerAllUsersList());
+		
+		return xmlHandlerAllUsersList.listUsers;
+			
 	}
 }
