@@ -388,25 +388,38 @@ public class ClientThread extends Thread {
 
 				// dout.writeBytes("OK\n");
 				// dout.flush();
+				
+				/* Vérrification mot de passe */
+				
+				System.out.println("mdp reçu : " +mdp);
+				System.out.println("mdp user : " +user.mdp);
+				
+				if(!(user.mdp).equals(mdp)){
+					System.out.println("Mauvais mot de passe!");
+					user = null;
+				}
+				else{
+					// AFFICHAGE USER RECUPERE
+
+					System.out.println("ID : " + user.userID);
+					System.out.println("Nom : " + user.nom);
+					System.out.println("Prenom : " + user.prenom);
+					System.out.println("Email : " + user.mail);
+					System.out.println("Mdp : " + user.mdp);
+
+					for (Tache t : user.lstTachesRea) {
+						System.out.println("Tache a réaliser : " + t);
+					}
+					for (Tache t : user.lstTachesCrea) {
+						System.out.println("Tache créée : " + t);
+					}
+				}
 
 				ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
 				oos.writeObject(user);
 				oos.flush();
 
-				// AFFICHAGE USER RECUPERE
-
-				System.out.println("ID : " + user.userID);
-				System.out.println("Nom : " + user.nom);
-				System.out.println("Prenom : " + user.prenom);
-				System.out.println("Email : " + user.mail);
-				System.out.println("Mdp : " + user.mdp);
-
-				for (Tache t : user.lstTachesRea) {
-					System.out.println("Tache a réaliser : " + t);
-				}
-				for (Tache t : user.lstTachesCrea) {
-					System.out.println("Tache créée : " + t);
-				}
+				
 
 			} else {
 				System.out.println("USER NOT FOUND");
