@@ -589,6 +589,13 @@ public class ClientThread extends Thread {
 
 	}
 
+	/**
+	 * Méthode appelée pour supprimer une tâche
+	 * @throws XMLStreamException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws ClassNotFoundException
+	 */
 	@SuppressWarnings("unchecked")
 	private void Suppression() throws XMLStreamException, IOException, InterruptedException, ClassNotFoundException {
 		System.out.println("Suppression");
