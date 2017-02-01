@@ -90,6 +90,7 @@ public class ClientThread extends Thread {
 					Suppression();
 					break;
 
+					// Envoie de la liste de tous les utilisateurs (id, email)
 				case SENDLISTUSER:
 					sendListUser();
 					break;
