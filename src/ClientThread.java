@@ -589,7 +589,7 @@ public class ClientThread extends Thread {
 	}
 
 	/**
-	 * Méthode appelée pour supprimer une tâche
+	 * Méthode appelée pour supprimer une tâche ne renvoie rien au client.
 	 * @throws XMLStreamException
 	 * @throws IOException
 	 * @throws InterruptedException
