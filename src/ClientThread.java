@@ -448,12 +448,11 @@ public class ClientThread extends Thread {
 				oos.writeObject(user);
 				oos.flush();
 			} else if (new SaxParserAllUsers().ParserUserId(user.mail) == null) {
-				dout.writeBytes("Problem parsing Users.xml\n");
-				dout.flush();
+				System.out.println("Problem parsing Users.xml\n");
 			} else {
-				System.out.println("Email déjà utilisée");
-				dout.writeBytes("Email already use\n");
-				dout.flush();
+				ObjectOutputStream oos = new ObjectOutputStream(socketClient.getOutputStream());
+				oos.writeObject(null);
+				oos.flush();
 			}
 
 		} catch (IOException e1) {
